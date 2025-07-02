@@ -4,7 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-//TRABALHANDO COM BANCO DE DADOS
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,82 +13,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//RESTAURANTE
 model Restaurant {
-  id              String         @id @default(uuid())
-  name            String
-  slung           String
-  descripiton     String
-  avatarImageUrl  String
-  coverImagemUrl  String //banner url
-  menuCatergories MenuCategory[]
-  products        Product[]
-  orders Order[]
-  createAt        DateTime       @default(now()) //valor do produto será exato ao valor que eu estou criando ele
-  updateAt        DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  name           String
+  slug           String
+  description    String
+  avatarImageUrl String
+  coverImageUrl  String
+  menuCategories MenuCategory[]
+  products       Product[]
+  orders         Order[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
-//CATEGORIA
 model MenuCategory {
   id           String     @id @default(uuid())
   name         String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id]) // (restaurantId referencia o ID da tabela de cima) este campo não será salvo no banco, ele servirá apenas para mostrar ao prisma que esta tabela faz referência à tabela de cima
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId String
   products     Product[]
-  createAt     DateTime   @default(now())
-  updateAt     DateTime   @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
-//PRODUTO
 model Product {
-  id              String         @id @default(uuid())
-  name            String
-  description     String
-  price           Float
-  ingredients     String[]
-  imageUrl        String
-  orderProducts   OrderProduct[]
-  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id]) //mesma explicação do comentário acima
-  restaurantId    String
-  menuCategory    MenuCategory   @relation(fields: [menuCategortyId], references: [id])
-  menuCategortyId String
-  createAt        DateTime       @default(now())
-  updateAt        DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  name           String
+  description    String
+  price          Float
+  imageUrl       String
+  ingredients    String[]
+  orderProducts  OrderProduct[]
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId   String
+  menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id], onDelete: Cascade)
+  menuCategoryId String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
-//PEDIDO
 model Order {
   id                Int               @id @default(autoincrement())
   total             Float
   status            OrderStatus
   consumptionMethod ConsumptionMethod
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId      String
   orderProducts     OrderProduct[]
-  restaurant Restaurant @relation(fields: [restuarntId], references: [id])
-  restuarntId String
-  createAt          DateTime          @default(now())
-  updateAt          DateTime          @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
-//PRODUTOS DO PEDIDO
 model OrderProduct {
   id        String   @id @default(uuid())
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   Int
   quantity  Int
   price     Float
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum OrderStatus {
-  PENDING //PENDENTE
+  PENDING
   IN_PREPARATION
   FINISHED
 }
 
 enum ConsumptionMethod {
-  TAKEWAY //LEVAR PARA VIAGEM
-  DINE_IN //COMER AQUI
+  TAKEAWAY
+  DINE_IN
 }
