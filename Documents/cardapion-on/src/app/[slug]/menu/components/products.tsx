@@ -12,7 +12,7 @@ const Products = ({ products }: ProductsProps) => {
       {products.map((product) => (
         <Link
           key={product.id}
-          href="/"
+          href= {`/${slug}/menu/${productId}`}
           className="flex items-center justify-between gap-10 border-b py-3"
         >
           {/* ESQUERDA */}

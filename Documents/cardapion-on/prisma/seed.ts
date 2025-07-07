@@ -9,7 +9,7 @@ const main = async () => {
     await tx.restaurant.deleteMany();
     const restaurant = await tx.restaurant.create({
       data: {
-        name: "FSW Donalds",
+        name: "FSW Donalds", //parâmetro para acessar o slug
         slug: "fsw-donalds",
         description: "O melhor fast food do mundo",
         avatarImageUrl:
