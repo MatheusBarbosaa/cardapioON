@@ -71,40 +71,49 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
     },
     shouldUnregister: true,
   });
-  const onSubmit = async (data: FormSchema) => {
-    try {
-      setIsLoading(true);
-      const consumptionMethod = searchParams.get(
-        "consumptionMethod",
-      ) as ConsumptionMethod;
+const onSubmit = async (data: FormSchema) => {
+  try {
+    setIsLoading(true);
+    
+    const consumptionMethod = searchParams.get("consumptionMethod") as ConsumptionMethod;
 
-      const order = await createOrder({
-        consumptionMethod,
-        customerCpf: data.cpf,
-        customerName: data.name,
-        products,
-        slug,
-      });
-      const { sessionId } = await createStripeCheckout({
-        products,
-        orderId: order.id,
-        slug,
-        consumptionMethod,
-        cpf: data.cpf,
-      });
-      if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) return;
-      const stripe = await loadStripe(
-        process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY,
-      );
-      stripe?.redirectToCheckout({
-        sessionId: sessionId,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    if (!products || products.length === 0) {
+      throw new Error("Carrinho está vazio.");
     }
-  };
+
+    if (!slug || !consumptionMethod) {
+      throw new Error("Parâmetros obrigatórios ausentes.");
+    }
+
+    const order = await createOrder({
+      consumptionMethod,
+      customerCpf: data.cpf,
+      customerName: data.name,
+      products,
+      slug,
+    });
+
+    const { sessionId } = await createStripeCheckout({
+      products,
+      orderId: order.id,
+      slug,
+      consumptionMethod,
+      cpf: data.cpf,
+    });
+
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) return;
+
+    const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+    stripe?.redirectToCheckout({ sessionId });
+
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao finalizar o pedido. Verifique os dados e tente novamente.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerTrigger asChild></DrawerTrigger>
