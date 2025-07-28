@@ -40,7 +40,7 @@ export const POST = async (request: Request) => {
         id: Number(session.metadata?.orderId),
       },
       data: {
-        status: "IN_PREPARATION",
+        status: "PAYMENT_CONFIRMED",
       },
     });
   }
